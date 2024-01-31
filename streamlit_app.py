@@ -1,29 +1,33 @@
 import streamlit as st
-from transformers import pipeline
+import yfinance as yf
+
 
 def main():
-    st.title("Interactive LLM Data Explorer")
+    st.title("Finance Explorer")
 
-    # Get user input
-    user_input = st.text_input("Enter your text:")
+    # Get user input for stock symbol
+    stock_symbol = st.text_input("Enter stock symbol (e.g., AAPL):")
 
-    # Generate response using LLM
-    if user_input:
-        response = generate_response(user_input)
-        st.write("### LLM Response:")
-        st.write(response)
+    # Fetch stock data based on user input
+    if stock_symbol:
+        stock_data = fetch_stock_data(stock_symbol)
+        if stock_data is not None:
+            st.write("### Stock Data")
+            st.write(stock_data)
+        else:
+            st.write("Stock data not found. Please enter a valid stock symbol.")
 
 
-def generate_response(input_text):
+def fetch_stock_data(symbol):
     """
-    Function to generate response using a pre-trained LLM.
+    Function to fetch stock data from Yahoo Finance based on the given symbol.
     """
-    # Load pre-trained model
-    text_generator = pipeline("text-generation", model="gpt2")
-
-    # Generate response
-    response = text_generator(input_text, max_length=50, do_sample=False)
-    return response[0]['generated_text']
+    try:
+        stock = yf.Ticker(symbol)
+        data = stock.history(period="1mo")  # Fetching data for the past month
+        return data
+    except:
+        return None
 
 
 if __name__ == "__main__":
